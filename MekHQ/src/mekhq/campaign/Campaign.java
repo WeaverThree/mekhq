@@ -238,6 +238,7 @@ public class Campaign implements ITechManager {
     private MekHQ app;
 
     private ShoppingList shoppingList;
+    private int refuseItemsUnderQuality;
 
     private PersonnelMarket personnelMarket;
     private AbstractContractMarket contractMarket;
@@ -317,6 +318,7 @@ public class Campaign implements ITechManager {
         game.setOptions(gameOptions);
         customs = new ArrayList<>();
         shoppingList = new ShoppingList();
+        refuseItemsUnderQuality = 0;
         news = new News(getGameYear(), id.getLeastSignificantBits());
         setPersonnelMarket(new PersonnelMarket());
         setContractMarket(new AtbMonthlyContractMarket());
@@ -464,6 +466,14 @@ public class Campaign implements ITechManager {
 
     public ShoppingList getShoppingList() {
         return shoppingList;
+    }
+
+    public void setRefuseItemsUnderQuality(int quality) {
+        refuseItemsUnderQuality = quality;
+    }
+
+    public int getRefuseItemsUnderQuality() {
+        return refuseItemsUnderQuality;
     }
 
     // region Markets
@@ -5383,6 +5393,7 @@ public class Campaign implements ITechManager {
         finances.writeToXML(pw, indent);
         location.writeToXML(pw, indent);
         shoppingList.writeToXML(pw, indent);
+        MHQXMLUtility.writeSimpleXMLTag(pw, indent, "refuseItemsUnderQuality", refuseItemsUnderQuality);
 
         MHQXMLUtility.writeSimpleXMLOpenTag(pw, indent++, "kills");
         for (List<Kill> kills : kills.values()) {

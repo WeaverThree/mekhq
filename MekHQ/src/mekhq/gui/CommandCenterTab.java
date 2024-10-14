@@ -31,6 +31,7 @@ import mekhq.campaign.event.*;
 import mekhq.campaign.finances.FinancialReport;
 import mekhq.campaign.mission.Mission;
 import mekhq.campaign.mission.Scenario;
+import mekhq.campaign.parts.Part;
 import mekhq.campaign.rating.CamOpsReputation.ReputationController;
 import mekhq.campaign.rating.UnitRatingMethod;
 import mekhq.campaign.report.CargoReport;
@@ -97,6 +98,8 @@ public final class CommandCenterTab extends CampaignGuiTab {
     private JButton btnPartsReport;
     private JButton btnMRMSDialog;
     private JButton btnMRMSInstant;
+    private JLabel lblRefuseBuyingPartsUnderQuality;
+    private JComboBox<String> cbRefuseBuyingPartsUnderQuality;
 
     // available reports
     private JPanel panReports;
@@ -387,7 +390,7 @@ public final class CommandCenterTab extends CampaignGuiTab {
      */
     private void initProcurementPanel() {
         /* shopping buttons */
-        JPanel panProcurementButtons = new JPanel(new GridLayout(6, 1));
+        JPanel panProcurementButtons = new JPanel(new GridLayout(8, 1));
         panProcurementButtons.getAccessibleContext().setAccessibleName("Procurement Actions");
 
         btnGetUnit = new JButton(resourceMap.getString("btnGetUnit.text"));
@@ -431,6 +434,30 @@ public final class CommandCenterTab extends CampaignGuiTab {
         });
         btnMRMSInstant.setVisible(MekHQ.getMHQOptions().getCommandCenterMRMS());
         panProcurementButtons.add(btnMRMSInstant);
+
+        lblRefuseBuyingPartsUnderQuality = new JLabel(resourceMap.getString("lblRefuseBuyingPartsUnderQuality.text"));
+        lblRefuseBuyingPartsUnderQuality.setToolTipText(resourceMap.getString("refuseBuyingPartsUnderQuality.toolTipText"));
+        lblRefuseBuyingPartsUnderQuality.setName("lblRefuseBuyingPartsUnderQuality");
+        panProcurementButtons.add(lblRefuseBuyingPartsUnderQuality);
+
+        String[] qualities;
+        if(!getCampaign().getCampaignOptions().isReverseQualityNames()) {
+            qualities = new String[] {"Do Not Refuse", "Under Quality B", "Under Quality C", 
+                "Under Quality D", "Under Quality E", "Under Quality F"};
+        } else {
+            qualities = new String[] {"Do Not Refuse", "Under Quality E", "Under Quality D",
+                "Under Quality C", "Under Quality B", "Under Quality A"};
+        }
+        cbRefuseBuyingPartsUnderQuality = new JComboBox<String>(qualities);
+        cbRefuseBuyingPartsUnderQuality.setToolTipText(resourceMap.getString("refuseBuyingPartsUnderQuality.toolTipText"));
+        cbRefuseBuyingPartsUnderQuality.setName("cbRefuseBuyingPartsUnderQuality");
+        cbRefuseBuyingPartsUnderQuality.addActionListener(evt -> {
+            if (cbRefuseBuyingPartsUnderQuality.getSelectedItem().equals("Do Not Refuse")) {
+                getCampaign().setRefuseItemsUnderQuality(Part.QUALITY_A);
+            } else {
+                String qualityName = 
+        });
+        panProcurementButtons.add(cbRefuseBuyingPartsUnderQuality);
 
         /* shopping table */
         procurementModel = new ProcurementTableModel(getCampaign());
