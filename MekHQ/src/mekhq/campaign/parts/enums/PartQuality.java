@@ -26,6 +26,9 @@ import mekhq.MekHQ;
 
 import java.util.*;
 
+import megamek.codeUtilities.MathUtility;
+import megamek.common.annotations.Nullable;
+
 /**
  * Represents the quality of a Part. Quality is a scale that ranges from A to F. By the book, A
  * is bad and F is good, but there is an option that inverts this scale, hence the 'reverse'
@@ -182,4 +185,23 @@ public enum PartQuality {
     public static List<PartQuality> allQualities() {
             return List.of(QUALITY_A,QUALITY_B,QUALITY_C,QUALITY_D,QUALITY_E,QUALITY_F);
     }
+    
+    /**
+     * @param mos - Margin of Success on a part acquisition roll
+     * @return result PartQuality or null if part not available
+     */
+    public static @Nullable PartQuality getQualityForMoS(int mos) {
+        mos = MathUtility.clamp(mos, -3, 5);
+        return switch (mos) {
+            case 5 -> PartQuality.QUALITY_F;
+            case 3, 4 -> PartQuality.QUALITY_E;
+            case 1, 2 -> PartQuality.QUALITY_D;
+            case 0 -> PartQuality.QUALITY_C;
+            case -1 -> PartQuality.QUALITY_B;
+            case -2 -> PartQuality.QUALITY_A;
+            case -3 -> null;
+            default -> null;
+        };
+    }
+
 }
