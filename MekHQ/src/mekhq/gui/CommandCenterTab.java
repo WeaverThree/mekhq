@@ -32,6 +32,7 @@ import mekhq.campaign.finances.FinancialReport;
 import mekhq.campaign.mission.Mission;
 import mekhq.campaign.mission.Scenario;
 import mekhq.campaign.parts.Part;
+import mekhq.campaign.parts.enums.PartQuality;
 import mekhq.campaign.rating.CamOpsReputation.ReputationController;
 import mekhq.campaign.rating.UnitRatingMethod;
 import mekhq.campaign.report.CargoReport;
@@ -440,22 +441,28 @@ public final class CommandCenterTab extends CampaignGuiTab {
         lblRefuseBuyingPartsUnderQuality.setName("lblRefuseBuyingPartsUnderQuality");
         panProcurementButtons.add(lblRefuseBuyingPartsUnderQuality);
 
-        String[] qualities;
-        if(!getCampaign().getCampaignOptions().isReverseQualityNames()) {
-            qualities = new String[] {"Do Not Refuse", "Under Quality B", "Under Quality C", 
-                "Under Quality D", "Under Quality E", "Under Quality F"};
-        } else {
-            qualities = new String[] {"Do Not Refuse", "Under Quality E", "Under Quality D",
-                "Under Quality C", "Under Quality B", "Under Quality A"};
-        }
+        
+        boolean reverse = getCampaign().getCampaignOptions().isReverseQualityNames();
+        String[] qualities = new String[] {
+            "Do Not Refuse",
+            "Under Quality " + PartQuality.QUALITY_B.toName(reverse),
+            "Under Quality " + PartQuality.QUALITY_C.toName(reverse),
+            "Under Quality " + PartQuality.QUALITY_D.toName(reverse),
+            "Under Quality " + PartQuality.QUALITY_E.toName(reverse),
+            "Under Quality " + PartQuality.QUALITY_F.toName(reverse),
+        };
+
         cbRefuseBuyingPartsUnderQuality = new JComboBox<String>(qualities);
         cbRefuseBuyingPartsUnderQuality.setToolTipText(resourceMap.getString("refuseBuyingPartsUnderQuality.toolTipText"));
         cbRefuseBuyingPartsUnderQuality.setName("cbRefuseBuyingPartsUnderQuality");
         cbRefuseBuyingPartsUnderQuality.addActionListener(evt -> {
-            if (cbRefuseBuyingPartsUnderQuality.getSelectedItem().equals("Do Not Refuse")) {
-                getCampaign().setRefuseItemsUnderQuality(Part.QUALITY_A);
+            String qualityString = (String) cbRefuseBuyingPartsUnderQuality.getSelectedItem();
+            if (qualityString.equals("Do Not Refuse")) {
+                getCampaign().setRefuseItemsUnderQuality(PartQuality.QUALITY_A);
             } else {
-                String qualityName = 
+                PartQuality.fromName(qualityString.substring(qualityString.length() - 1),
+                        getCampaign().getCampaignOptions().isReverseQualityNames());
+            }
         });
         panProcurementButtons.add(cbRefuseBuyingPartsUnderQuality);
 

@@ -51,6 +51,7 @@ import mekhq.campaign.Campaign;
 import mekhq.campaign.Quartermaster;
 import mekhq.campaign.parts.Part;
 import mekhq.campaign.parts.PartInUse;
+import mekhq.campaign.parts.enums.PartQuality;
 import mekhq.campaign.work.IAcquisitionWork;
 import mekhq.gui.CampaignGUI;
 import mekhq.gui.model.PartsInUseTableModel;
@@ -264,12 +265,16 @@ public class PartsReportDialog extends JDialog {
         ignoreMothballedCheck = new JCheckBox(resourceMap.getString("chkIgnoreMothballed.text"));
         ignoreMothballedCheck.addActionListener(evt -> refreshOverviewPartsInUse());
 
-        String[] qualities;
-        if(!campaign.getCampaignOptions().isReverseQualityNames()) {
-            qualities = new String[] {" ", "B", "C", "D", "E", "F"};
-        } else {
-            qualities = new String[] {" ", "E", "D", "C", "B", "A"};
-        }
+        boolean reverse = campaign.getCampaignOptions().isReverseQualityNames();
+        String[] qualities = {
+            " ", // Combo box is blank for first one because it accepts everything and is default
+            PartQuality.QUALITY_B.toName(reverse),
+            PartQuality.QUALITY_C.toName(reverse),
+            PartQuality.QUALITY_D.toName(reverse),
+            PartQuality.QUALITY_E.toName(reverse),
+            PartQuality.QUALITY_F.toName(reverse)
+        };
+
         ignoreSparesUnderQualityCB = new JComboBox<String>(qualities);
         ignoreSparesUnderQualityCB.setMaximumSize(ignoreSparesUnderQualityCB.getPreferredSize());
         ignoreSparesUnderQualityCB.addActionListener(evt -> refreshOverviewPartsInUse());
@@ -303,16 +308,16 @@ public class PartsReportDialog extends JDialog {
 
 
     /**
-     * @param rating String containing A to F or space, from combo box
+     * @param name String containing A to F or space, from combo box
      * @return minimum internal quality level to use
      */
     
-    private int getMinimumQuality(String rating) {
-        if (rating.equals(" ")) {
+    private PartQuality getMinimumQuality(String name) {
+        if (name.equals(" ")) {
             // The blank spot always means "everything", so minimum = lowest
-            return Part.QUALITY_A;
+            return PartQuality.QUALITY_A;
         } else {
-            return Part.getQualityFromName(rating, campaign.getCampaignOptions().isReverseQualityNames());
+            return PartQuality.fromName(name, campaign.getCampaignOptions().isReverseQualityNames());
         }
     }
 

@@ -239,7 +239,7 @@ public class Campaign implements ITechManager {
     private MekHQ app;
 
     private ShoppingList shoppingList;
-    private int refuseItemsUnderQuality;
+    private PartQuality refuseItemsUnderQuality;
 
     private PersonnelMarket personnelMarket;
     private AbstractContractMarket contractMarket;
@@ -319,7 +319,7 @@ public class Campaign implements ITechManager {
         game.setOptions(gameOptions);
         customs = new ArrayList<>();
         shoppingList = new ShoppingList();
-        refuseItemsUnderQuality = 0;
+        refuseItemsUnderQuality = PartQuality.QUALITY_A;
         news = new News(getGameYear(), id.getLeastSignificantBits());
         setPersonnelMarket(new PersonnelMarket());
         setContractMarket(new AtbMonthlyContractMarket());
@@ -469,11 +469,11 @@ public class Campaign implements ITechManager {
         return shoppingList;
     }
 
-    public void setRefuseItemsUnderQuality(int quality) {
+    public void setRefuseItemsUnderQuality(PartQuality quality) {
         refuseItemsUnderQuality = quality;
     }
 
-    public int getRefuseItemsUnderQuality() {
+    public PartQuality getRefuseItemsUnderQuality() {
         return refuseItemsUnderQuality;
     }
 
@@ -2249,29 +2249,31 @@ public class Campaign implements ITechManager {
         return (null != result.getPartToBuy()) ? result : null;
     }
 
-    private void updatePartInUseData(PartInUse piu, Part p, boolean ignoreMothballedUnits,
-            int ignoreSparesUnderQuality) {
+    private void updatePartInUseData(PartInUse piu, Part incomingPart, boolean ignoreMothballedUnits,
+            PartQuality ignoreSparesUnderQuality) {
 
-        if (ignoreMothballedUnits && (null != p.getUnit()) && p.getUnit().isMothballed()) {
+        if (ignoreMothballedUnits && (null != incomingPart.getUnit()) && incomingPart.getUnit().isMothballed()) {
             // Ignore it
-        } else if ((p.getUnit() != null) || (p instanceof MissingPart)) {
-            piu.setUseCount(piu.getUseCount() + getQuantity(p));
+        } else if ((incomingPart.getUnit() != null) || (incomingPart instanceof MissingPart)) {
+            piu.setUseCount(piu.getUseCount() + getQuantity(incomingPart));
         } else {
-            if (p.isPresent()) {
-                if (p.getQuality() < ignoreSparesUnderQuality) {
+            if (incomingPart.isPresent()) {
+                if (incomingPart.getQuality().toNumeric() < ignoreSparesUnderQuality.toNumeric()) {
                     // Ignore it
                 } else {
-                    piu.setStoreCount(piu.getStoreCount() + getQuantity(p));
-                    piu.addSpare(p);
+                    piu.setStoreCount(piu.getStoreCount() + getQuantity(incomingPart));
+                    piu.addSpare(incomingPart);
                 }
             } else {
-                piu.setTransferCount(piu.getTransferCount() + getQuantity(p));
+                piu.setTransferCount(piu.getTransferCount() + getQuantity(incomingPart));
             }
         }
     }
 
     /** Update the piu with the current campaign data */
-    public void updatePartInUse(PartInUse piu, boolean ignoreMothballedUnits, int ignoreSparesUnderQuality) {
+    public void updatePartInUse(PartInUse piu, boolean ignoreMothballedUnits,
+            PartQuality ignoreSparesUnderQuality) {
+
         piu.setUseCount(0);
         piu.setStoreCount(0);
         piu.setTransferCount(0);
@@ -2292,12 +2294,12 @@ public class Campaign implements ITechManager {
         }
     }
 
-    public Set<PartInUse> getPartsInUse(boolean ignoreMothballedUnits, int ignoreSparesUnderQuality) {
+    public Set<PartInUse> getPartsInUse(boolean ignoreMothballedUnits, PartQuality ignoreSparesUnderQuality) {
         // java.util.Set doesn't supply a get(Object) method, so we have to use a
         // java.util.Map
         Map<PartInUse, PartInUse> inUse = new HashMap<>();
-        getWarehouse().forEachPart(p -> {
-            PartInUse piu = getPartInUse(p);
+        getWarehouse().forEachPart(incomingPart -> {
+            PartInUse piu = getPartInUse(incomingPart);
             if (null == piu) {
                 return;
             }
@@ -2306,7 +2308,7 @@ public class Campaign implements ITechManager {
             } else {
                 inUse.put(piu, piu);
             }
-            updatePartInUseData(piu, p, ignoreMothballedUnits, ignoreSparesUnderQuality);
+            updatePartInUseData(piu, incomingPart, ignoreMothballedUnits, ignoreSparesUnderQuality);
         });
         for (IAcquisitionWork maybePart : shoppingList.getPartList()) {
             if (!(maybePart instanceof Part)) {
@@ -5389,7 +5391,8 @@ public class Campaign implements ITechManager {
         finances.writeToXML(pw, indent);
         location.writeToXML(pw, indent);
         shoppingList.writeToXML(pw, indent);
-        MHQXMLUtility.writeSimpleXMLTag(pw, indent, "refuseItemsUnderQuality", refuseItemsUnderQuality);
+        MHQXMLUtility.writeSimpleXMLTag(pw, indent, "refuseItemsUnderQuality",
+            refuseItemsUnderQuality.toNumeric());
 
         MHQXMLUtility.writeSimpleXMLOpenTag(pw, indent++, "kills");
         for (List<Kill> kills : kills.values()) {
