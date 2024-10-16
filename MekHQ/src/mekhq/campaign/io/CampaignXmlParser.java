@@ -46,6 +46,7 @@ import mekhq.campaign.mission.Mission;
 import mekhq.campaign.mission.Scenario;
 import mekhq.campaign.mod.am.InjuryTypes;
 import mekhq.campaign.parts.*;
+import mekhq.campaign.parts.enums.PartQuality;
 import mekhq.campaign.parts.equipment.*;
 import mekhq.campaign.personnel.Person;
 import mekhq.campaign.personnel.PersonnelOptions;
@@ -734,6 +735,10 @@ public class CampaignXmlParser {
                     retVal.setMedicPool(Integer.parseInt(wn.getTextContent().trim()));
                 } else if (xn.equalsIgnoreCase("id")) {
                     retVal.setId(UUID.fromString(wn.getTextContent().trim()));
+                } else if (xn.equalsIgnoreCase("refusePurchaseUnderQuality")) {
+                    logger.info("LOADING REFUSE " + wn.getTextContent());
+                    retVal.setRefusePurchaseUnderQuality(
+                            PartQuality.fromNumeric(Integer.parseInt(wn.getTextContent().trim())));
                 }
             } catch (Exception e) {
                 logger.error("", e);

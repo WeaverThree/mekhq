@@ -239,7 +239,7 @@ public class Campaign implements ITechManager {
     private MekHQ app;
 
     private ShoppingList shoppingList;
-    private PartQuality refuseItemsUnderQuality;
+    private PartQuality refusePurchaseUnderQuality;
 
     private PersonnelMarket personnelMarket;
     private AbstractContractMarket contractMarket;
@@ -319,7 +319,7 @@ public class Campaign implements ITechManager {
         game.setOptions(gameOptions);
         customs = new ArrayList<>();
         shoppingList = new ShoppingList();
-        refuseItemsUnderQuality = PartQuality.QUALITY_A;
+        refusePurchaseUnderQuality = PartQuality.QUALITY_A;
         news = new News(getGameYear(), id.getLeastSignificantBits());
         setPersonnelMarket(new PersonnelMarket());
         setContractMarket(new AtbMonthlyContractMarket());
@@ -469,12 +469,12 @@ public class Campaign implements ITechManager {
         return shoppingList;
     }
 
-    public void setRefuseItemsUnderQuality(PartQuality quality) {
-        refuseItemsUnderQuality = quality;
+    public void setRefusePurchaseUnderQuality(PartQuality quality) {
+        refusePurchaseUnderQuality = quality;
     }
 
-    public PartQuality getRefuseItemsUnderQuality() {
-        return refuseItemsUnderQuality;
+    public PartQuality getRefusePurchaseUnderQuality() {
+        return refusePurchaseUnderQuality;
     }
 
     // region Markets
@@ -5358,6 +5358,9 @@ public class Campaign implements ITechManager {
             pw.println(MHQXMLUtility.indentStr(indent) + "<reportLine><![CDATA[" + s + "]]></reportLine>");
         }
         MHQXMLUtility.writeSimpleXMLCloseTag(pw, --indent, "currentReport");
+                                                  
+        MHQXMLUtility.writeSimpleXMLTag(pw, indent, "refusePurchaseUnderQuality",
+            refusePurchaseUnderQuality.toNumeric());
 
         MHQXMLUtility.writeSimpleXMLCloseTag(pw, --indent, "info");
         // endregion Basic Campaign Info
@@ -5391,8 +5394,6 @@ public class Campaign implements ITechManager {
         finances.writeToXML(pw, indent);
         location.writeToXML(pw, indent);
         shoppingList.writeToXML(pw, indent);
-        MHQXMLUtility.writeSimpleXMLTag(pw, indent, "refuseItemsUnderQuality",
-            refuseItemsUnderQuality.toNumeric());
 
         MHQXMLUtility.writeSimpleXMLOpenTag(pw, indent++, "kills");
         for (List<Kill> kills : kills.values()) {

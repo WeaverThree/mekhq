@@ -99,8 +99,8 @@ public final class CommandCenterTab extends CampaignGuiTab {
     private JButton btnPartsReport;
     private JButton btnMRMSDialog;
     private JButton btnMRMSInstant;
-    private JLabel lblRefuseBuyingPartsUnderQuality;
-    private JComboBox<String> cbRefuseBuyingPartsUnderQuality;
+    private JLabel lblRefusePurchaseUnderQuality;
+    private JComboBox<String> cbRefusePurchaseUnderQuality;
 
     // available reports
     private JPanel panReports;
@@ -436,10 +436,10 @@ public final class CommandCenterTab extends CampaignGuiTab {
         btnMRMSInstant.setVisible(MekHQ.getMHQOptions().getCommandCenterMRMS());
         panProcurementButtons.add(btnMRMSInstant);
 
-        lblRefuseBuyingPartsUnderQuality = new JLabel(resourceMap.getString("lblRefuseBuyingPartsUnderQuality.text"));
-        lblRefuseBuyingPartsUnderQuality.setToolTipText(resourceMap.getString("refuseBuyingPartsUnderQuality.toolTipText"));
-        lblRefuseBuyingPartsUnderQuality.setName("lblRefuseBuyingPartsUnderQuality");
-        panProcurementButtons.add(lblRefuseBuyingPartsUnderQuality);
+        lblRefusePurchaseUnderQuality = new JLabel(resourceMap.getString("lblRefusePurchaseUnderQuality.text"));
+        lblRefusePurchaseUnderQuality.setToolTipText(resourceMap.getString("refusePurchaseUnderQuality.toolTipText"));
+        lblRefusePurchaseUnderQuality.setName("lblRefusePurchaseUnderQuality");
+        panProcurementButtons.add(lblRefusePurchaseUnderQuality);
 
         
         boolean reverse = getCampaign().getCampaignOptions().isReverseQualityNames();
@@ -452,19 +452,26 @@ public final class CommandCenterTab extends CampaignGuiTab {
             "Under Quality " + PartQuality.QUALITY_F.toName(reverse),
         };
 
-        cbRefuseBuyingPartsUnderQuality = new JComboBox<String>(qualities);
-        cbRefuseBuyingPartsUnderQuality.setToolTipText(resourceMap.getString("refuseBuyingPartsUnderQuality.toolTipText"));
-        cbRefuseBuyingPartsUnderQuality.setName("cbRefuseBuyingPartsUnderQuality");
-        cbRefuseBuyingPartsUnderQuality.addActionListener(evt -> {
-            String qualityString = (String) cbRefuseBuyingPartsUnderQuality.getSelectedItem();
+        cbRefusePurchaseUnderQuality = new JComboBox<String>(qualities);
+        cbRefusePurchaseUnderQuality.setToolTipText(resourceMap.getString("refusePurchaseUnderQuality.toolTipText"));
+        cbRefusePurchaseUnderQuality.setName("refusePurchaseUnderQuality");
+        cbRefusePurchaseUnderQuality.addActionListener(evt -> {
+            String qualityString = (String) cbRefusePurchaseUnderQuality.getSelectedItem();
             if (qualityString.equals("Do Not Refuse")) {
-                getCampaign().setRefuseItemsUnderQuality(PartQuality.QUALITY_A);
+                getCampaign().setRefusePurchaseUnderQuality(PartQuality.QUALITY_A);
             } else {
-                PartQuality.fromName(qualityString.substring(qualityString.length() - 1),
-                        getCampaign().getCampaignOptions().isReverseQualityNames());
+                getCampaign().setRefusePurchaseUnderQuality(
+                    PartQuality.fromName(qualityString.substring(qualityString.length() - 1),
+                        getCampaign().getCampaignOptions().isReverseQualityNames()));
             }
         });
-        panProcurementButtons.add(cbRefuseBuyingPartsUnderQuality);
+
+        if (getCampaign().getRefusePurchaseUnderQuality() != PartQuality.QUALITY_A) {
+            cbRefusePurchaseUnderQuality.setSelectedItem("Under Quality " +
+                    getCampaign().getRefusePurchaseUnderQuality().toName(reverse));
+        }
+
+        panProcurementButtons.add(cbRefusePurchaseUnderQuality);
 
         /* shopping table */
         procurementModel = new ProcurementTableModel(getCampaign());
