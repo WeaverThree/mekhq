@@ -604,6 +604,10 @@ public class MekLocation extends Part {
                 toReturn.append(" (")
                     .append(Math.round(100 * getPercent()))
                     .append("%)");
+                if (campaign.getCampaignOptions().isPayForRepairs()) {
+                    toReturn.append(", ")
+                        .append(getUndamagedValue().multipliedBy(0.2).toAmountAndSymbolString() + " to repair");
+                }
             }
         }
 
@@ -868,9 +872,9 @@ public class MekLocation extends Part {
         toReturn.append("<html><b>")
             .append(isBlownOff() ? "Re-attach " : "Seal ")
             .append(getName())
-            .append(", ")
-            .append(getTonnage())
-            .append("ton - ")
+            .append(" (")
+            .append(getUnitTonnage())
+            .append(" ton) - ")
             .append(ReportingUtilities.messageSurroundedBySpanWithColor(
                 SkillType.getExperienceLevelColor(getSkillMin()),
                 SkillType.getExperienceLevelName(getSkillMin()) + "+"))
